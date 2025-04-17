@@ -1,27 +1,50 @@
-const express = require('express');  // Import the Express library
-const path = require('path');  // Import path utility to handle file paths
-
+const express = require('express');
+const path = require('path');
 const app = express();
-const PORT = process.env.PORT || 3000;  // Use the port specified by the environment or 3000 for local development
+const PORT = process.env.PORT || 3000;
 
-// Serve static files from the 'assets' folder (CSS, JS, images, etc.)
+const Product = require('./models/Product');
+const User = require('./models/User');
+
+// Serve static files from /ec/assets
 app.use('/ec/assets', express.static(path.join(__dirname, 'assets')));
 
-// Serve the 'index.html' file when the root route '/ec' is accessed
+// Redirect root route to /ec
+app.get('/', (req, res) => {
+  res.redirect('/ec');
+});
+
+// Serve index.html at /ec
 app.get('/ec', (req, res) => {
-  res.sendFile(path.join(__dirname, 'views', 'index.html'));  // Path to index.html
+  res.sendFile(path.join(__dirname, 'views', 'index.html'));
 });
 
-// Define other routes with '/ec' prefix
+// Other routes
 app.get('/ec/about', (req, res) => {
-  res.send('This is the About Us page.');
+  res.send('About page');
 });
 
-app.get('/ec/contact', (req, res) => {
-  res.send('This is the Contact Us page.');
-});
-
-// Start the server on the specified port
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
+});
+// Get all products
+app.get('/ec/api/products', async (req, res) => {
+  try {
+    const products = await Product.getAllProducts();
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// User registration
+app.post('/ec/api/register', express.json(), async (req, res) => {
+  try {
+    const { username, email, password } = req.body;
+    // Add password hashing (use bcrypt in real apps)
+    const user = await User.createUser(username, email, password);
+    res.status(201).json(user);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
 });
