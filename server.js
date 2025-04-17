@@ -1,7 +1,7 @@
 const express = require('express');
 const path = require('path');
-const Product = require('./database/models/Product'); // Use correct path
-const User = require('./database/models/User');       // Use correct path
+const Product = require('./database/models/Product');
+const User = require('./database/models/User');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -23,6 +23,7 @@ app.get('/ec/about', (req, res) => {
   res.send('About page');
 });
 
+// API Routes
 app.get('/ec/api/products', async (req, res) => {
   try {
     const products = await Product.getAllProducts();
@@ -35,7 +36,6 @@ app.get('/ec/api/products', async (req, res) => {
 app.post('/ec/api/register', async (req, res) => {
   try {
     const { username, email, password } = req.body;
-    // Add password hashing here (use bcrypt)
     const user = await User.createUser(username, email, password);
     res.status(201).json(user);
   } catch (err) {
