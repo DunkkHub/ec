@@ -1,4 +1,6 @@
 const express = require('express');
+const Product = require('./models/Product');
+const Product = require('./database/models/Product');
 const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
