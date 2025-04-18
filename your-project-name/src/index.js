@@ -1,17 +1,44 @@
-import React from 'react';
+import React, { createContext, useState, useEffect, useContext } from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+// Create the context
+const CartContext = createContext();
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+// Create a provider component
+export const CartProvider = ({ children }) => {
+  const [cartItems, setCartItems] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('cart');
+      return saved ? JSON.parse(saved) : [];
+    }
+    return [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('cart', JSON.stringify(cartItems));
+  }, [cartItems]);
+
+  const addItemToCart = (item) => {
+    setCartItems(prevItems => [...prevItems, item]);
+  };
+
+  const removeItemFromCart = (itemToRemove) => {
+    setCartItems(prevItems => prevItems.filter(item => item.id !== itemToRemove.id));
+  };
+
+  return (
+    <CartContext.Provider value={{ cartItems, addItemToCart, removeItemFromCart }}>
+      {children}
+    </CartContext.Provider>
+  );
+};
+
+// Create a custom hook to use the context
+export const useCart = () => useContext(CartContext);
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<CartProvider><App /></CartProvider>);
+
